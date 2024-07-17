@@ -1,10 +1,16 @@
-cook_book = {}
-
+my_cook_book = {}
+from copy import deepcopy
+import os
 def get_shop_list_by_dishes(dishes, person_count):
     res = {}
+    cook_book = deepcopy(my_cook_book)
     for i in dishes:
-        for j in cook_book[i]:
-            res[j['ingredient_name']] = {'measure' : j['measure'], 'quantity' : int(j['quantity']) * person_count}
+        if i in cook_book:
+            for j in cook_book[i]:
+                j['quantity'] *= person_count
+                res[j['ingredient_name']] = j
+        else:
+            print(f'Блюда {i} нет в рецептах')
     return print(res)
 
 with open('recipes.txt', encoding='utf-8') as recept:
@@ -14,34 +20,22 @@ with open('recipes.txt', encoding='utf-8') as recept:
         tmp = []
         for j in range(ingredient_quantity):
             a, b, c = recept.readline().strip().split(' | ')
-            tmp.append({'ingredient_name' : a, 'quantity' : b, 'measure' : c})
-            cook_book[dish] = tmp
+            tmp.append({'ingredient_name' : a, 'quantity' : int(b), 'measure' : c})
+            my_cook_book[dish] = tmp
         fakeline = recept.readline()
 
 
-get_shop_list_by_dishes(['Запеченный картофель', 'Омлет'], 2)
+get_shop_list_by_dishes(['Омлет', 'Омлет'], 2)
 
 file = {}
+for filename in sorted(os.listdir('sorted'), key=len):
+    with open(f'sorted/{filename}', encoding='utf-8') as f:
+        tmp = []
+        for i in f:
+            tmp.append(i)
+        file[filename, len(tmp)] = tmp
 
-with open('sorted/1.txt', encoding='utf-8') as f1, open('sorted/2.txt', encoding='utf-8') as f2, open('sorted/3.txt', encoding='utf-8') as f3:
-    tmp = []
-    for i in f1:
-        tmp.append(i)
-    name = f1.name.split('/')
-    file[name[1], len(tmp)] = tmp
-    tmp = []
-    for i in f2:
-        tmp.append(i)
-    name = f2.name.split('/')
-    file[name[1], len(tmp)] = tmp
-    tmp = []
-    for i in f3:
-        tmp.append(i)
-    name = f3.name.split('/')
-    file[name[1], len(tmp)] = tmp
-
-with open('sorted/sort_files.txt', 'w', encoding='utf-8') as files:
-    i = 0
+with open('sort_files.txt', 'w', encoding='utf-8') as files:
     for k, v in sorted(file.items(), key=lambda x: x[1], reverse=True):
         for i in k:
             files.write(str(i) + '\n')
@@ -50,3 +44,4 @@ with open('sorted/sort_files.txt', 'w', encoding='utf-8') as files:
             files.write(str(n) + ' ' + i)
             n += 1
         files.write('\n')
+
